@@ -37,7 +37,7 @@
     },
     "playwright": {
       "command": "npx",
-      "args": ["-y", "@anthropic/playwright-mcp-server"],
+      "args": ["-y", "@playwright/mcp@latest"],
       "disabled": false,
       "_comment": "Playwright MCP - Used by test-engineer for browser testing. Disable if not needed."
     }

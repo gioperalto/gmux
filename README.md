@@ -19,7 +19,13 @@ The team follows a structured workflow: plan → implement → review → test �
 
 **Claude Code CLI**
 
+Install via Homebrew (macOS/Linux) or npm:
+
 ```bash
+# Homebrew
+brew install claude-code
+
+# npm
 npm install -g @anthropic-ai/claude-code
 ```
 
@@ -33,33 +39,45 @@ Agent teams require the experimental teams feature. This is already configured i
 
 All supplementary tools are optional. gmux works without them, but they enhance specific agent capabilities. Disable any tool by setting `enabled: false` in `gmux.yaml` and `"disabled": true` in `.claude/settings.json`.
 
+> **Note:** gmux ships with MCP servers pre-configured in `.claude/settings.json`. The instructions below are for installing the underlying tools that those servers depend on. If you'd rather register MCP servers yourself (or add them to a different scope), use `claude mcp add`.
+
 **Codex CLI** (used by sr-engineer)
 
 ```bash
+# Homebrew
+brew install codex
+
+# npm
 npm install -g @openai/codex
 ```
 
 Provides the sr-engineer with Codex-powered code generation and analysis via MCP. Requires an OpenAI API key.
 
-**Mermaid MCP Server** (used by architect)
+If not pre-configured in `settings.json`, register manually:
 
 ```bash
-# Runs automatically via npx — no global install needed.
-# To pre-install:
-npm install -g @anthropic/mermaid-mcp-server
+claude mcp add codex -- codex --mcp
 ```
+
+**Mermaid MCP Server** (used by architect)
 
 Enables the architect to generate architecture diagrams, flowcharts, and sequence diagrams.
 
-**Playwright MCP Server** (used by test-engineer)
+If not pre-configured in `settings.json`, register manually:
 
 ```bash
-# Runs automatically via npx — no global install needed.
-# To pre-install:
-npm install -g @anthropic/playwright-mcp-server
+claude mcp add mermaid -- npx -y @anthropic/mermaid-mcp-server
 ```
 
-Enables the test engineer to write and run browser-based end-to-end tests.
+**Playwright MCP Server** (used by test-engineer)
+
+Enables the test engineer to write and run browser-based end-to-end tests. See the [Playwright MCP documentation](https://github.com/microsoft/playwright-mcp) for full setup options.
+
+If not pre-configured in `settings.json`, register manually:
+
+```bash
+claude mcp add playwright -- npx -y @playwright/mcp@latest
+```
 
 **Frontend Design Plugin** (used by jr-engineers)
 

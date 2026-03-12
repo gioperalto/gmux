@@ -9,26 +9,32 @@ permissions:
 
 jobs:
   bump:
-    # Skip commits made by the bot (formula updates, version bumps) to prevent loops
-    if: github.actor != 'github-actions[bot]'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:
           fetch-depth: 2
+          token: ${{ secrets.PAT }}
 
-      - name: Check if VERSION was already bumped in this push
+      - name: Check if this push should be skipped
         id: check
         run: |
-          if git diff HEAD~1 -- VERSION | grep -q '^[+-][0-9]'; then
-            echo "bumped=true" >> "$GITHUB_OUTPUT"
+          # Skip if the commit was made by the bot (version bump or formula update)
+          AUTHOR="$(git log -1 --format='%ae')"
+          if [ "$AUTHOR" = "github-actions[bot]@users.noreply.github.com" ]; then
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            echo "Skipping: commit authored by github-actions[bot]"
+          # Skip if VERSION was already changed in this push (manual bump)
+          elif git diff HEAD~1 -- VERSION | grep -q '^[+-][0-9]'; then
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            echo "Skipping: VERSION already changed in this push"
           else
-            echo "bumped=false" >> "$GITHUB_OUTPUT"
+            echo "skip=false" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Increment patch version
-        if: steps.check.outputs.bumped == 'false'
+        if: steps.check.outputs.skip == 'false'
         run: |
           VERSION="$(cat VERSION | tr -d '[:space:]')"
           IFS='.' read -r major minor patch <<< "$VERSION"
@@ -37,7 +43,7 @@ jobs:
           echo "Bumped $VERSION → $major.$minor.$patch"
 
       - name: Commit and push
-        if: steps.check.outputs.bumped == 'false'
+        if: steps.check.outputs.skip == 'false'
         run: |
           VERSION="$(cat VERSION | tr -d '[:space:]')"
           git config user.name "github-actions[bot]"

@@ -25,7 +25,7 @@
   "mcpServers": {
     "codex": {
       "command": "codex",
-      "args": ["--mcp"],
+      "args": ["mcp-server"],
       "disabled": false,
       "_comment": "Codex MCP - Used by sr-engineer for code generation. Disable if not installed."
     },

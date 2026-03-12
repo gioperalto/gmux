@@ -33,7 +33,7 @@ You need an active Anthropic API key or Claude Pro/Team subscription. See [Claud
 
 **Experimental Teams Flag**
 
-Agent teams require the experimental teams feature. This is already configured in `.claude/settings.json` — no manual setup needed.
+Agent teams require the experimental teams feature. `gmux init` configures this automatically in `.claude/settings.json`.
 
 ### Optional Supplementary Tools
 
@@ -85,31 +85,30 @@ Enable in Claude Code settings. Used by jr engineers for UI implementation guida
 
 ## Quick Start
 
-1. **Copy gmux files into your project:**
+1. **Install gmux:**
    ```bash
-   # Copy these files/directories into your project root:
-   #   gmux.yaml
-   #   CLAUDE.md
-   #   .claude/settings.json
-   #   .claude/agents/architect.md
-   #   .claude/agents/sr-engineer.md
-   #   .claude/agents/jr-engineer.md
-   #   .claude/agents/test-engineer.md
+   brew install gmux
+   ```
+   Or install from a local clone:
+   ```bash
+   brew install --formula Formula/gmux.rb
    ```
 
-2. **Customize `gmux.yaml`** (optional):
-   - Adjust agent models and counts
-   - Enable/disable supplementary tools
-   - Modify workflow settings
+2. **Initialize in your project:**
+   ```bash
+   cd your-project
+   gmux init
+   ```
+   This copies `gmux.yaml`, agent definitions, and merges Claude Code settings automatically.
 
-3. **Merge `.claude/settings.json`** with your existing settings if you already have one.
+3. **Customize** `gmux.yaml` (optional) — adjust models, agent counts, tools, workflow settings.
 
 4. **Start Claude Code:**
    ```bash
    claude
    ```
 
-5. **Give it a task.** Claude reads `CLAUDE.md` on startup, which instructs it to bootstrap a gmux team for multi-agent work.
+5. **Give it a task.** Claude reads the config on startup and bootstraps a gmux team.
 
 ## Configuration
 

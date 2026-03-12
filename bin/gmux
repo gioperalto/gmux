@@ -1,0 +1,221 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Resolve symlinks to find the real script location (works with Homebrew symlinks)
+SCRIPT_PATH="${BASH_SOURCE[0]}"
+while [ -L "$SCRIPT_PATH" ]; do
+  SCRIPT_DIR="$(cd -P "$(dirname "$SCRIPT_PATH")" && pwd)"
+  SCRIPT_PATH="$(readlink "$SCRIPT_PATH")"
+  [[ "$SCRIPT_PATH" != /* ]] && SCRIPT_PATH="$SCRIPT_DIR/$SCRIPT_PATH"
+done
+SCRIPT_DIR="$(cd -P "$(dirname "$SCRIPT_PATH")" && pwd)"
+
+SHARE_DIR="$SCRIPT_DIR/../share/gmux"
+VERSION_FILE="$SCRIPT_DIR/../VERSION"
+
+# Read version from VERSION file, fallback to "dev"
+if [ -f "$VERSION_FILE" ]; then
+  VERSION="$(cat "$VERSION_FILE")"
+else
+  # Homebrew installs may not have VERSION at prefix root; try share dir
+  VERSION="dev"
+fi
+
+# ── Helpers ──────────────────────────────────────────────────────────────────
+
+usage() {
+  cat <<EOF
+gmux $VERSION — Composable Claude Code agent team harness
+
+Usage:
+  gmux init [--force]    Scaffold gmux into the current project
+  gmux help              Show this help message
+  gmux version           Print version
+
+Options:
+  --force                Overwrite existing files during init
+EOF
+}
+
+info()  { printf '  \033[32m✓\033[0m %s\n' "$1"; }
+skip()  { printf '  \033[33m⊘\033[0m %s (already exists, use --force to overwrite)\n' "$1"; }
+warn()  { printf '  \033[33m!\033[0m %s\n' "$1"; }
+merge() { printf '  \033[36m⇄\033[0m %s\n' "$1"; }
+
+# Copy a file from share/gmux/ to a destination, respecting --force
+copy_file() {
+  local src="$1" dst="$2" force="$3"
+  if [ -f "$dst" ] && [ "$force" != "true" ]; then
+    skip "$dst"
+    return 1
+  fi
+  mkdir -p "$(dirname "$dst")"
+  cp "$src" "$dst"
+  info "$dst"
+  return 0
+}
+
+# ── CLAUDE.md handling ───────────────────────────────────────────────────────
+
+MARKER_BEGIN="<!-- gmux:begin -->"
+MARKER_END="<!-- gmux:end -->"
+
+claudemd_section() {
+  # Extract content from template CLAUDE.md wrapped in markers
+  printf '%s\n' "$MARKER_BEGIN"
+  cat "$SHARE_DIR/CLAUDE.md"
+  printf '\n%s\n' "$MARKER_END"
+}
+
+handle_claudemd() {
+  local force="$1"
+  if [ ! -f "CLAUDE.md" ]; then
+    # No existing CLAUDE.md — write template with markers
+    claudemd_section > "CLAUDE.md"
+    info "CLAUDE.md (created)"
+  elif [ "$force" = "true" ]; then
+    # Force mode — replace gmux section or create fresh
+    if grep -q "$MARKER_BEGIN" "CLAUDE.md" 2>/dev/null; then
+      replace_claudemd_section
+      info "CLAUDE.md (gmux section replaced)"
+    else
+      printf '\n' >> "CLAUDE.md"
+      claudemd_section >> "CLAUDE.md"
+      info "CLAUDE.md (gmux section appended)"
+    fi
+  elif grep -q "$MARKER_BEGIN" "CLAUDE.md" 2>/dev/null; then
+    # Already has gmux section
+    skip "CLAUDE.md (gmux section)"
+  else
+    # Exists but no gmux section — append
+    printf '\n' >> "CLAUDE.md"
+    claudemd_section >> "CLAUDE.md"
+    info "CLAUDE.md (gmux section appended)"
+  fi
+}
+
+replace_claudemd_section() {
+  local tmp
+  tmp="$(mktemp)"
+  local in_section=false
+  local replaced=false
+  while IFS= read -r line; do
+    if [ "$line" = "$MARKER_BEGIN" ]; then
+      in_section=true
+      if [ "$replaced" = "false" ]; then
+        claudemd_section >> "$tmp"
+        replaced=true
+      fi
+      continue
+    fi
+    if [ "$line" = "$MARKER_END" ]; then
+      in_section=false
+      continue
+    fi
+    if [ "$in_section" = "false" ]; then
+      printf '%s\n' "$line" >> "$tmp"
+    fi
+  done < "CLAUDE.md"
+  mv "$tmp" "CLAUDE.md"
+}
+
+# ── settings.json deep merge ────────────────────────────────────────────────
+
+merge_settings() {
+  local src="$1" dst="$2" force="$3"
+  if [ ! -f "$dst" ]; then
+    mkdir -p "$(dirname "$dst")"
+    cp "$src" "$dst"
+    info "$dst (created)"
+    return
+  fi
+  if [ "$force" = "true" ]; then
+    cp "$src" "$dst"
+    info "$dst (overwritten)"
+    return
+  fi
+  # Deep merge using python3 (ships on macOS)
+  local tmp
+  tmp="$(mktemp)"
+  python3 -c "
+import json, sys
+
+def deep_merge(base, overlay):
+    for key, val in overlay.items():
+        if key in base and isinstance(base[key], dict) and isinstance(val, dict):
+            deep_merge(base[key], val)
+        elif key in base and isinstance(base[key], list) and isinstance(val, list):
+            # Union lists (preserve order, no duplicates)
+            seen = set(json.dumps(x, sort_keys=True) if isinstance(x, (dict, list)) else x for x in base[key])
+            for item in val:
+                k = json.dumps(item, sort_keys=True) if isinstance(item, (dict, list)) else item
+                if k not in seen:
+                    base[key].append(item)
+                    seen.add(k)
+        else:
+            base[key] = val
+    return base
+
+with open(sys.argv[1]) as f:
+    existing = json.load(f)
+with open(sys.argv[2]) as f:
+    template = json.load(f)
+
+merged = deep_merge(existing, template)
+print(json.dumps(merged, indent=2))
+" "$dst" "$src" > "$tmp" && mv "$tmp" "$dst"
+  merge "Merged $dst"
+}
+
+# ── Init command ─────────────────────────────────────────────────────────────
+
+cmd_init() {
+  local force=false
+  while [ $# -gt 0 ]; do
+    case "$1" in
+      --force) force=true; shift ;;
+      *) echo "Unknown option: $1"; exit 1 ;;
+    esac
+  done
+
+  if [ ! -d "$SHARE_DIR" ]; then
+    echo "Error: Template directory not found at $SHARE_DIR"
+    echo "Is gmux installed correctly?"
+    exit 1
+  fi
+
+  echo "Initializing gmux in $(pwd)..."
+  echo ""
+
+  # 1. gmux.yaml
+  copy_file "$SHARE_DIR/gmux.yaml" "./gmux.yaml" "$force" || true
+
+  # 2. CLAUDE.md
+  handle_claudemd "$force"
+
+  # 3. Agent definitions
+  mkdir -p ".claude/agents"
+  for agent in architect sr-engineer jr-engineer test-engineer; do
+    copy_file "$SHARE_DIR/claude/agents/$agent.md" ".claude/agents/$agent.md" "$force" || true
+  done
+
+  # 4. settings.local.json.example
+  copy_file "$SHARE_DIR/claude/settings.local.json.example" ".claude/settings.local.json.example" "$force" || true
+
+  # 5. settings.json (deep merge)
+  merge_settings "$SHARE_DIR/claude/settings.json" ".claude/settings.json" "$force"
+
+  echo ""
+  echo "Done! Next steps:"
+  echo "  1. Customize gmux.yaml (optional)"
+  echo "  2. Run 'claude' to start a gmux session"
+}
+
+# ── Main ─────────────────────────────────────────────────────────────────────
+
+case "${1:-help}" in
+  init)       shift; cmd_init "$@" ;;
+  version|--version|-v)  echo "gmux $VERSION" ;;
+  help|--help|-h)        usage ;;
+  *)          echo "Unknown command: $1"; usage; exit 1 ;;
+esac

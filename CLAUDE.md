@@ -1,6 +1,6 @@
-# harnest — Composable Claude Code Agent Harness
+# Harnest — Composable Claude Code Agent Harness
 
-harnest is a drop-in agent team configuration for Claude Code. It provides a structured workflow where an architect plans, a senior engineer sets conventions and reviews, junior engineers implement in parallel, and a test engineer validates before merge.
+Harnest is a drop-in agent team configuration for Claude Code. It provides a structured workflow where an architect plans, a senior engineer sets conventions and reviews, junior engineers implement in parallel, and a test engineer validates before merge.
 
 ## Configuration
 
@@ -71,7 +71,7 @@ harnest/<task-id>-<short-description>
 
 ## Tmux Mode
 
-harnest also supports a **tmux split-pane mode** where each agent runs as a separate `claude` CLI process in its own tmux pane. Use `harnest fly "<task>"` to launch and `harnest land` to tear down.
+Harnest also supports a **tmux split-pane mode** where each agent runs as a separate `claude` CLI process in its own tmux pane. Use `harnest fly "<task>"` to launch and `harnest land` to tear down.
 
 In tmux mode, agents coordinate through the `.harnest/` filesystem directory instead of built-in Claude Code team tools. Each agent's prompt includes a coordination protocol that explains how to read/write task files, send messages, and update status through the filesystem. The layout includes a monitor pane with a live dashboard.
 

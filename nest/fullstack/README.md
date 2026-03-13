@@ -1,4 +1,4 @@
-# fullstack — harnest Chick
+# fullstack — Harnest Chick
 
 A structured multi-agent team for full-stack development. An architect plans, a senior engineer sets conventions and reviews, junior engineers implement in parallel, and a test engineer validates before merge.
 

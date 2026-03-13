@@ -10,22 +10,22 @@ while [ -L "$SCRIPT_PATH" ]; do
 done
 SCRIPT_DIR="$(cd -P "$(dirname "$SCRIPT_PATH")" && pwd)"
 
-# Homebrew layout: share/gmux/templates/...  Local dev: templates/...
-if [ -d "$SCRIPT_DIR/../share/gmux/templates" ]; then
-  SHARE_DIR="$SCRIPT_DIR/../share/gmux"
+# Homebrew layout: share/harnest/nest/...  Local dev: nest/...
+if [ -d "$SCRIPT_DIR/../share/harnest/nest" ]; then
+  SHARE_DIR="$SCRIPT_DIR/../share/harnest"
 else
   SHARE_DIR="$SCRIPT_DIR/.."
 fi
-if [ -d "$SCRIPT_DIR/../share/gmux/lib" ]; then
-  LIB_DIR="$SCRIPT_DIR/../share/gmux/lib"
+if [ -d "$SCRIPT_DIR/../share/harnest/lib" ]; then
+  LIB_DIR="$SCRIPT_DIR/../share/harnest/lib"
 else
   LIB_DIR="$SCRIPT_DIR/../lib"
 fi
 VERSION_FILE="$SCRIPT_DIR/../VERSION"
 
 # Global config
-GMUX_CONFIG_DIR="$HOME/.config/gmux"
-GMUX_CONFIG="$GMUX_CONFIG_DIR/config"
+HARNEST_CONFIG_DIR="$HOME/.config/harnest"
+HARNEST_CONFIG="$HARNEST_CONFIG_DIR/config"
 
 # Read version from VERSION file, fallback to "dev"
 if [ -f "$VERSION_FILE" ]; then
@@ -39,20 +39,20 @@ fi
 
 usage() {
   cat <<EOF
-gmux $VERSION — Composable Claude Code agent team harness
+harnest $VERSION — Composable Claude Code agent team harness
 
 Usage:
-  gmux init [--template <name>] [--force]   Scaffold a template into the current project
-  gmux start [--template <name>] [task...]  Launch agents in tmux split panes
-  gmux stop                                 Stop tmux session and clean up
-  gmux templates                            List available templates
-  gmux --template <name>                    Set the global default template
-  gmux help                                 Show this help message
-  gmux version                              Print version
+  harnest hatch [--chick <name>] [--force]   Scaffold a nest into the current project
+  harnest fly [--chick <name>] [task...]     Launch agents in tmux split panes
+  harnest land                               Stop tmux session and clean up
+  harnest nest                               List available chicks
+  harnest --chick <name>                     Set the global default chick
+  harnest help                               Show this help message
+  harnest version                            Print version
 
 Options:
-  --template <name>   Template to use (default: fullstack)
-  --force             Overwrite existing files during init
+  --chick <name>   Chick (nest template) to use (default: fullstack)
+  --force          Overwrite existing files during hatch
 EOF
 }
 
@@ -61,43 +61,43 @@ skip()  { printf '  \033[33m⊘\033[0m %s (already exists, use --force to overwr
 warn()  { printf '  \033[33m!\033[0m %s\n' "$1"; }
 merge() { printf '  \033[36m⇄\033[0m %s\n' "$1"; }
 
-get_default_template() {
-  if [ -f "$GMUX_CONFIG" ]; then
-    local tmpl
-    tmpl="$(grep '^template=' "$GMUX_CONFIG" 2>/dev/null | cut -d= -f2)"
-    if [ -n "$tmpl" ]; then
-      echo "$tmpl"
+get_default_chick() {
+  if [ -f "$HARNEST_CONFIG" ]; then
+    local chick
+    chick="$(grep '^chick=' "$HARNEST_CONFIG" 2>/dev/null | cut -d= -f2)"
+    if [ -n "$chick" ]; then
+      echo "$chick"
       return
     fi
   fi
   echo "fullstack"
 }
 
-set_default_template() {
+set_default_chick() {
   local name="$1"
-  local template_dir="$SHARE_DIR/templates/$name"
-  if [ ! -d "$template_dir" ]; then
-    echo "Error: Template '$name' not found." >&2
-    cmd_templates >&2
+  local chick_dir="$SHARE_DIR/nest/$name"
+  if [ ! -d "$chick_dir" ]; then
+    echo "Error: Chick '$name' not found." >&2
+    cmd_nest >&2
     exit 1
   fi
-  mkdir -p "$GMUX_CONFIG_DIR"
-  echo "template=$name" > "$GMUX_CONFIG"
-  info "Default template set to '$name' (saved to $GMUX_CONFIG)"
+  mkdir -p "$HARNEST_CONFIG_DIR"
+  echo "chick=$name" > "$HARNEST_CONFIG"
+  info "Default chick set to '$name' (saved to $HARNEST_CONFIG)"
 }
 
-resolve_template_dir() {
+resolve_chick_dir() {
   local name="$1"
-  local template_dir="$SHARE_DIR/templates/$name"
-  if [ ! -d "$template_dir" ]; then
-    echo "Error: Template '$name' not found." >&2
-    cmd_templates >&2
+  local chick_dir="$SHARE_DIR/nest/$name"
+  if [ ! -d "$chick_dir" ]; then
+    echo "Error: Chick '$name' not found." >&2
+    cmd_nest >&2
     exit 1
   fi
-  echo "$template_dir"
+  echo "$chick_dir"
 }
 
-# Copy a file from template dir to a destination, respecting --force
+# Copy a file from chick dir to a destination, respecting --force
 copy_file() {
   local src="$1" dst="$2" force="$3"
   if [ -f "$dst" ] && [ "$force" != "true" ]; then
@@ -112,46 +112,46 @@ copy_file() {
 
 # ── CLAUDE.md handling ───────────────────────────────────────────────────────
 
-MARKER_BEGIN="<!-- gmux:begin -->"
-MARKER_END="<!-- gmux:end -->"
+MARKER_BEGIN="<!-- harnest:begin -->"
+MARKER_END="<!-- harnest:end -->"
 
 claudemd_section() {
-  local template_dir="$1"
-  # Extract content from template CLAUDE.md wrapped in markers
+  local chick_dir="$1"
+  # Extract content from chick CLAUDE.md wrapped in markers
   printf '%s\n' "$MARKER_BEGIN"
-  cat "$template_dir/CLAUDE.md"
+  cat "$chick_dir/CLAUDE.md"
   printf '\n%s\n' "$MARKER_END"
 }
 
 handle_claudemd() {
-  local template_dir="$1" force="$2"
+  local chick_dir="$1" force="$2"
   if [ ! -f "CLAUDE.md" ]; then
-    # No existing CLAUDE.md — write template with markers
-    claudemd_section "$template_dir" > "CLAUDE.md"
+    # No existing CLAUDE.md — write chick with markers
+    claudemd_section "$chick_dir" > "CLAUDE.md"
     info "CLAUDE.md (created)"
   elif [ "$force" = "true" ]; then
-    # Force mode — replace gmux section or create fresh
+    # Force mode — replace harnest section or create fresh
     if grep -q "$MARKER_BEGIN" "CLAUDE.md" 2>/dev/null; then
-      replace_claudemd_section "$template_dir"
-      info "CLAUDE.md (gmux section replaced)"
+      replace_claudemd_section "$chick_dir"
+      info "CLAUDE.md (harnest section replaced)"
     else
       printf '\n' >> "CLAUDE.md"
-      claudemd_section "$template_dir" >> "CLAUDE.md"
-      info "CLAUDE.md (gmux section appended)"
+      claudemd_section "$chick_dir" >> "CLAUDE.md"
+      info "CLAUDE.md (harnest section appended)"
     fi
   elif grep -q "$MARKER_BEGIN" "CLAUDE.md" 2>/dev/null; then
-    # Already has gmux section
-    skip "CLAUDE.md (gmux section)"
+    # Already has harnest section
+    skip "CLAUDE.md (harnest section)"
   else
-    # Exists but no gmux section — append
+    # Exists but no harnest section — append
     printf '\n' >> "CLAUDE.md"
-    claudemd_section "$template_dir" >> "CLAUDE.md"
-    info "CLAUDE.md (gmux section appended)"
+    claudemd_section "$chick_dir" >> "CLAUDE.md"
+    info "CLAUDE.md (harnest section appended)"
   fi
 }
 
 replace_claudemd_section() {
-  local template_dir="$1"
+  local chick_dir="$1"
   local tmp
   tmp="$(mktemp)"
   local in_section=false
@@ -160,7 +160,7 @@ replace_claudemd_section() {
     if [ "$line" = "$MARKER_BEGIN" ]; then
       in_section=true
       if [ "$replaced" = "false" ]; then
-        claudemd_section "$template_dir" >> "$tmp"
+        claudemd_section "$chick_dir" >> "$tmp"
         replaced=true
       fi
       continue
@@ -216,31 +216,31 @@ def deep_merge(base, overlay):
 with open(sys.argv[1]) as f:
     existing = json.load(f)
 with open(sys.argv[2]) as f:
-    template = json.load(f)
+    chick = json.load(f)
 
-merged = deep_merge(existing, template)
+merged = deep_merge(existing, chick)
 print(json.dumps(merged, indent=2))
 " "$dst" "$src" > "$tmp" && mv "$tmp" "$dst"
   merge "Merged $dst"
 }
 
-# ── Templates command ────────────────────────────────────────────────────────
+# ── Nest command ─────────────────────────────────────────────────────────────
 
-cmd_templates() {
-  local templates_dir="$SHARE_DIR/templates"
-  if [ ! -d "$templates_dir" ]; then
-    echo "Error: Templates directory not found at $templates_dir" >&2
-    echo "Is gmux installed correctly?" >&2
+cmd_nest() {
+  local nest_dir="$SHARE_DIR/nest"
+  if [ ! -d "$nest_dir" ]; then
+    echo "Error: Nest directory not found at $nest_dir" >&2
+    echo "Is harnest installed correctly?" >&2
     exit 1
   fi
-  local default_tmpl
-  default_tmpl="$(get_default_template)"
-  echo "Available templates:"
-  for dir in "$templates_dir"/*/; do
+  local default_chick
+  default_chick="$(get_default_chick)"
+  echo "Available chicks:"
+  for dir in "$nest_dir"/*/; do
     [ -d "$dir" ] || continue
     local name
     name="$(basename "$dir")"
-    if [ "$name" = "$default_tmpl" ]; then
+    if [ "$name" = "$default_chick" ]; then
       echo "  $name (default)"
     else
       echo "  $name"
@@ -248,44 +248,44 @@ cmd_templates() {
   done
 }
 
-# ── Init command ─────────────────────────────────────────────────────────────
+# ── Hatch command ─────────────────────────────────────────────────────────────
 
-cmd_init() {
+cmd_hatch() {
   local force=false
-  local template=""
+  local chick=""
   while [ $# -gt 0 ]; do
     case "$1" in
       --force) force=true; shift ;;
-      --template)
+      --chick)
         if [ $# -lt 2 ]; then
-          echo "Error: --template requires a value"
+          echo "Error: --chick requires a value"
           exit 1
         fi
-        template="$2"; shift 2 ;;
+        chick="$2"; shift 2 ;;
       *) echo "Unknown option: $1"; exit 1 ;;
     esac
   done
 
-  # Resolve template name
-  if [ -z "$template" ]; then
-    template="$(get_default_template)"
+  # Resolve chick name
+  if [ -z "$chick" ]; then
+    chick="$(get_default_chick)"
   fi
 
-  local template_dir
-  template_dir="$(resolve_template_dir "$template")"
+  local chick_dir
+  chick_dir="$(resolve_chick_dir "$chick")"
 
-  echo "Initializing gmux ($template template) in $(pwd)..."
+  echo "Hatching harnest ($chick chick) in $(pwd)..."
   echo ""
 
-  # 1. gmux.yaml
-  copy_file "$template_dir/gmux.yaml" "./gmux.yaml" "$force" || true
+  # 1. harnest.yaml
+  copy_file "$chick_dir/harnest.yaml" "./harnest.yaml" "$force" || true
 
   # 2. CLAUDE.md
-  handle_claudemd "$template_dir" "$force"
+  handle_claudemd "$chick_dir" "$force"
 
   # 3. Agent definitions
   mkdir -p ".claude/agents"
-  for agent in "$template_dir"/claude/agents/*.md; do
+  for agent in "$chick_dir"/claude/agents/*.md; do
     [ -f "$agent" ] || continue
     local agent_name
     agent_name="$(basename "$agent")"
@@ -293,35 +293,35 @@ cmd_init() {
   done
 
   # 4. settings.local.json.example
-  if [ -f "$template_dir/claude/settings.local.json.example" ]; then
-    copy_file "$template_dir/claude/settings.local.json.example" ".claude/settings.local.json.example" "$force" || true
+  if [ -f "$chick_dir/claude/settings.local.json.example" ]; then
+    copy_file "$chick_dir/claude/settings.local.json.example" ".claude/settings.local.json.example" "$force" || true
   fi
 
   # 5. settings.json (deep merge)
-  if [ -f "$template_dir/claude/settings.json" ]; then
-    merge_settings "$template_dir/claude/settings.json" ".claude/settings.json" "$force"
+  if [ -f "$chick_dir/claude/settings.json" ]; then
+    merge_settings "$chick_dir/claude/settings.json" ".claude/settings.json" "$force"
   fi
 
   echo ""
   echo "Done! Next steps:"
-  echo "  1. Customize gmux.yaml (optional)"
-  echo "  2. Run 'claude' to start a gmux session"
+  echo "  1. Customize harnest.yaml (optional)"
+  echo "  2. Run 'claude' to start a harnest session"
 }
 
-# ── Start command (tmux split-pane mode) ────────────────────────────────────
+# ── Fly command (tmux split-pane mode) ───────────────────────────────────────
 
-cmd_start() {
-  local template=""
+cmd_fly() {
+  local chick=""
   local task_desc=""
 
   while [ $# -gt 0 ]; do
     case "$1" in
-      --template)
+      --chick)
         if [ $# -lt 2 ]; then
-          echo "Error: --template requires a value" >&2
+          echo "Error: --chick requires a value" >&2
           exit 1
         fi
-        template="$2"; shift 2 ;;
+        chick="$2"; shift 2 ;;
       *)
         # Everything else is the task description
         task_desc="$*"
@@ -331,35 +331,35 @@ cmd_start() {
 
   # ── Validate prerequisites ──────────────────────────────────────────────
   if ! command -v tmux &>/dev/null; then
-    echo "Error: tmux is required for 'gmux start'. Install it with: brew install tmux" >&2
+    echo "Error: tmux is required for 'harnest fly'. Install it with: brew install tmux" >&2
     exit 1
   fi
   if ! command -v claude &>/dev/null; then
     echo "Error: claude CLI is required. Install it with: brew install claude-code" >&2
     exit 1
   fi
-  if [ ! -f "gmux.yaml" ]; then
-    echo "Error: gmux.yaml not found. Run 'gmux init' first." >&2
+  if [ ! -f "harnest.yaml" ]; then
+    echo "Error: harnest.yaml not found. Run 'harnest hatch' first." >&2
     exit 1
   fi
   if [ -z "$task_desc" ]; then
     echo "Error: Task description is required." >&2
-    echo "Usage: gmux start [--template <name>] <task description...>" >&2
+    echo "Usage: harnest fly [--chick <name>] <task description...>" >&2
     exit 1
   fi
 
-  # ── Parse gmux.yaml ────────────────────────────────────────────────────
+  # ── Parse harnest.yaml ─────────────────────────────────────────────────
   local config_json
-  config_json="$(python3 "$LIB_DIR/gmux-parse-yaml.py" gmux.yaml)"
+  config_json="$(python3 "$LIB_DIR/harnest-parse-yaml.py" harnest.yaml)"
 
   local session_name
-  session_name="$(echo "$config_json" | python3 -c "import json,sys; d=json.load(sys.stdin); print(d.get('tmux',{}).get('session_name','gmux'))")"
+  session_name="$(echo "$config_json" | python3 -c "import json,sys; d=json.load(sys.stdin); print(d.get('tmux',{}).get('session_name','harnest'))")"
 
   local refresh_interval
   refresh_interval="$(echo "$config_json" | python3 -c "import json,sys; d=json.load(sys.stdin); print(d.get('tmux',{}).get('monitor',{}).get('refresh_interval',2))")"
 
   local branch_prefix
-  branch_prefix="$(echo "$config_json" | python3 -c "import json,sys; d=json.load(sys.stdin); print(d.get('workflow',{}).get('branch_prefix','gmux/'))")"
+  branch_prefix="$(echo "$config_json" | python3 -c "import json,sys; d=json.load(sys.stdin); print(d.get('workflow',{}).get('branch_prefix','harnest/'))")"
 
   # Extract layout as flat list of pane names
   local layout_json
@@ -370,29 +370,29 @@ cmd_start() {
 
   # Check for existing session
   if tmux has-session -t "$session_name" 2>/dev/null; then
-    echo "Error: tmux session '$session_name' already exists. Run 'gmux stop' first." >&2
+    echo "Error: tmux session '$session_name' already exists. Run 'harnest land' first." >&2
     exit 1
   fi
 
   # ── Resolve agent files ────────────────────────────────────────────────
   local agents_dir=".claude/agents"
   if [ ! -d "$agents_dir" ]; then
-    # Fallback: try to find via template
-    if [ -z "$template" ]; then
-      template="$(get_default_template)"
+    # Fallback: try to find via chick
+    if [ -z "$chick" ]; then
+      chick="$(get_default_chick)"
     fi
-    local tdir
-    tdir="$(resolve_template_dir "$template")"
-    agents_dir="$tdir/claude/agents"
+    local cdir
+    cdir="$(resolve_chick_dir "$chick")"
+    agents_dir="$cdir/claude/agents"
   fi
 
-  echo "Starting gmux tmux session ($session_name)..."
+  echo "Starting harnest tmux session ($session_name)..."
   echo ""
 
-  # ── Create .gmux/ directory structure ──────────────────────────────────
-  rm -rf .gmux
-  mkdir -p .gmux/{tasks,messages,status,worktrees,prompts}
-  touch .gmux/log.jsonl
+  # ── Create .harnest/ directory structure ───────────────────────────────
+  rm -rf .harnest
+  mkdir -p .harnest/{tasks,messages,status,worktrees,prompts}
+  touch .harnest/log.jsonl
 
   # Write config.json
   local started_at
@@ -405,10 +405,10 @@ config = {
     'task': $(python3 -c "import json; print(json.dumps('$task_desc'))"),
     'agents': ['architect', 'sr-engineer', 'jr-engineer-1', 'jr-engineer-2', 'test-engineer']
 }
-with open('.gmux/config.json', 'w') as f:
+with open('.harnest/config.json', 'w') as f:
     json.dump(config, f, indent=2)
 "
-  info ".gmux/ directory created"
+  info ".harnest/ directory created"
 
   # ── Create git worktrees for jr engineers ──────────────────────────────
   local current_branch
@@ -416,17 +416,17 @@ with open('.gmux/config.json', 'w') as f:
 
   for jr in jr-engineer-1 jr-engineer-2; do
     local wt_branch="${branch_prefix}${jr}-workspace"
-    if git worktree list 2>/dev/null | grep -q ".gmux/worktrees/$jr"; then
-      git worktree remove --force ".gmux/worktrees/$jr" 2>/dev/null || true
+    if git worktree list 2>/dev/null | grep -q ".harnest/worktrees/$jr"; then
+      git worktree remove --force ".harnest/worktrees/$jr" 2>/dev/null || true
     fi
     git branch -D "$wt_branch" 2>/dev/null || true
-    git worktree add -b "$wt_branch" ".gmux/worktrees/$jr" HEAD 2>/dev/null
-    info "Worktree: .gmux/worktrees/$jr ($wt_branch)"
+    git worktree add -b "$wt_branch" ".harnest/worktrees/$jr" HEAD 2>/dev/null
+    info "Worktree: .harnest/worktrees/$jr ($wt_branch)"
   done
 
   # ── Generate agent prompts ─────────────────────────────────────────────
   local protocol
-  protocol="$(cat "$LIB_DIR/gmux-tmux-protocol.md")"
+  protocol="$(cat "$LIB_DIR/harnest-tmux-protocol.md")"
 
   local agents=("architect" "sr-engineer" "jr-engineer-1" "jr-engineer-2" "test-engineer")
   local agent_files=("architect.md" "sr-engineer.md" "jr-engineer.md" "jr-engineer.md" "test-engineer.md")
@@ -434,7 +434,7 @@ with open('.gmux/config.json', 'w') as f:
   for idx in "${!agents[@]}"; do
     local agent="${agents[$idx]}"
     local agent_file="${agent_files[$idx]}"
-    local prompt_file=".gmux/prompts/${agent}.txt"
+    local prompt_file=".harnest/prompts/${agent}.txt"
     local agent_md_path="${agents_dir}/${agent_file}"
 
     {
@@ -444,7 +444,7 @@ with open('.gmux/config.json', 'w') as f:
       echo ""
       echo "# Your Identity"
       echo ""
-      echo "You are **${agent}** in this gmux tmux session."
+      echo "You are **${agent}** in this harnest tmux session."
       echo ""
       if [ -f "$agent_md_path" ]; then
         # Strip frontmatter from agent .md
@@ -457,11 +457,11 @@ with open('.gmux/config.json', 'w') as f:
       echo ""
       echo "$task_desc"
     } > "$prompt_file"
-    info "Prompt: .gmux/prompts/${agent}.txt"
+    info "Prompt: .harnest/prompts/${agent}.txt"
   done
 
   # ── Log session start ──────────────────────────────────────────────────
-  echo "{\"ts\":\"$started_at\",\"agent\":\"system\",\"action\":\"session_started\",\"message\":\"gmux tmux session started: $task_desc\"}" >> .gmux/log.jsonl
+  echo "{\"ts\":\"$started_at\",\"agent\":\"system\",\"action\":\"session_started\",\"message\":\"harnest tmux session started: $task_desc\"}" >> .harnest/log.jsonl
 
   # ── Create tmux session with panes ─────────────────────────────────────
   echo ""
@@ -518,10 +518,10 @@ with open('.gmux/config.json', 'w') as f:
   for pname in "${pane_names[@]}"; do
     if [ "$pname" = "monitor" ]; then
       tmux send-keys -t "$session_name:0.${pane_idx}" \
-        "watch -n ${refresh_interval} -c 'bash \"$LIB_DIR/gmux-monitor.sh\"'" C-m
+        "watch -n ${refresh_interval} -c 'bash \"$LIB_DIR/harnest-monitor.sh\"'" C-m
       info "Pane $pane_idx: monitor (watch)"
     else
-      local prompt_file=".gmux/prompts/${pname}.txt"
+      local prompt_file=".harnest/prompts/${pname}.txt"
       if [ -f "$prompt_file" ]; then
         # Use --print to run claude in non-interactive print mode with the prompt
         tmux send-keys -t "$session_name:0.${pane_idx}" \
@@ -539,20 +539,20 @@ with open('.gmux/config.json', 'w') as f:
   echo ""
   echo "Attaching to tmux session..."
   echo "  Detach: Ctrl-b d"
-  echo "  Stop:   gmux stop"
+  echo "  Land:   harnest land"
   echo ""
 
   # Attach to session
   tmux attach-session -t "$session_name"
 }
 
-# ── Stop command ─────────────────────────────────────────────────────────────
+# ── Land command ──────────────────────────────────────────────────────────────
 
-cmd_stop() {
-  # Determine session name from .gmux/config.json or default
-  local session_name="gmux"
-  if [ -f ".gmux/config.json" ]; then
-    session_name="$(python3 -c "import json; print(json.load(open('.gmux/config.json')).get('session_name','gmux'))" 2>/dev/null || echo "gmux")"
+cmd_land() {
+  # Determine session name from .harnest/config.json or default
+  local session_name="harnest"
+  if [ -f ".harnest/config.json" ]; then
+    session_name="$(python3 -c "import json; print(json.load(open('.harnest/config.json')).get('session_name','harnest'))" 2>/dev/null || echo "harnest")"
   fi
 
   # Kill tmux session
@@ -564,30 +564,22 @@ cmd_stop() {
   fi
 
   # Remove git worktrees
-  if [ -d ".gmux/worktrees" ]; then
-    for wt in .gmux/worktrees/*/; do
+  if [ -d ".harnest/worktrees" ]; then
+    for wt in .harnest/worktrees/*/; do
       [ -d "$wt" ] || continue
       local wt_name
       wt_name="$(basename "$wt")"
       git worktree remove --force "$wt" 2>/dev/null || true
-      # Clean up the branch
-      local branch_prefix
-      branch_prefix="$(python3 -c "
-import json,sys
-try:
-    d = json.load(open('.gmux/config.json'))
-except: pass
-" 2>/dev/null || echo "gmux/")"
       info "Removed worktree: $wt_name"
     done
   fi
 
   # Print task summary
-  if [ -d ".gmux/tasks" ]; then
+  if [ -d ".harnest/tasks" ]; then
     echo ""
     echo "Task Summary:"
     local completed=0 in_progress=0 pending=0
-    for f in .gmux/tasks/task-*.json; do
+    for f in .harnest/tasks/task-*.json; do
       [ -f "$f" ] || continue
       local status
       status="$(python3 -c "import json; print(json.load(open('$f')).get('status','unknown'))" 2>/dev/null || echo "unknown")"
@@ -603,22 +595,22 @@ except: pass
   fi
 
   # Log session end
-  if [ -f ".gmux/log.jsonl" ]; then
-    echo "{\"ts\":\"$(date -u +%Y-%m-%dT%H:%M:%SZ)\",\"agent\":\"system\",\"action\":\"session_stopped\",\"message\":\"gmux tmux session stopped\"}" >> .gmux/log.jsonl
+  if [ -f ".harnest/log.jsonl" ]; then
+    echo "{\"ts\":\"$(date -u +%Y-%m-%dT%H:%M:%SZ)\",\"agent\":\"system\",\"action\":\"session_stopped\",\"message\":\"harnest tmux session landed\"}" >> .harnest/log.jsonl
   fi
 
   # Archive option
   echo ""
-  if [ -d ".gmux" ]; then
-    printf "Archive .gmux/ directory? [y/N] "
+  if [ -d ".harnest" ]; then
+    printf "Archive .harnest/ directory? [y/N] "
     read -r answer
     if [[ "$answer" =~ ^[Yy] ]]; then
-      local archive_name=".gmux-archive-$(date +%Y%m%d-%H%M%S)"
-      mv .gmux "$archive_name"
+      local archive_name=".harnest-archive-$(date +%Y%m%d-%H%M%S)"
+      mv .harnest "$archive_name"
       info "Archived to $archive_name"
     else
-      rm -rf .gmux
-      info "Removed .gmux/"
+      rm -rf .harnest
+      info "Removed .harnest/"
     fi
   fi
 }
@@ -626,17 +618,17 @@ except: pass
 # ── Main ─────────────────────────────────────────────────────────────────────
 
 case "${1:-help}" in
-  init)       shift; cmd_init "$@" ;;
-  start)      shift; cmd_start "$@" ;;
-  stop)       cmd_stop ;;
-  templates)  cmd_templates ;;
-  --template)
+  hatch)      shift; cmd_hatch "$@" ;;
+  fly)        shift; cmd_fly "$@" ;;
+  land)       cmd_land ;;
+  nest)       cmd_nest ;;
+  --chick)
     if [ $# -lt 2 ]; then
-      echo "Error: --template requires a value"
+      echo "Error: --chick requires a value"
       exit 1
     fi
-    set_default_template "$2" ;;
-  version|--version|-v)  echo "gmux $VERSION" ;;
+    set_default_chick "$2" ;;
+  version|--version|-v)  echo "harnest $VERSION" ;;
   help|--help|-h)        usage ;;
   *)          echo "Unknown command: $1"; usage; exit 1 ;;
 esac

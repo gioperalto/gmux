@@ -1,10 +1,10 @@
-# gmux — Composable Claude Code Agent Harness
+# harnest — Composable Claude Code Agent Harness
 
-gmux is a drop-in agent team configuration for Claude Code. It provides a structured workflow where an architect plans, a senior engineer sets conventions and reviews, junior engineers implement in parallel, and a test engineer validates before merge.
+harnest is a drop-in agent team configuration for Claude Code. It provides a structured workflow where an architect plans, a senior engineer sets conventions and reviews, junior engineers implement in parallel, and a test engineer validates before merge.
 
 ## Configuration
 
-All team settings live in `gmux.yaml` at the project root. Read it at the start of every session — it is the source of truth for agent roles, models, counts, workflow rules, and supplementary tool availability.
+All team settings live in `harnest.yaml` at the project root. Read it at the start of every session — it is the source of truth for agent roles, models, counts, workflow rules, and supplementary tool availability.
 
 ## Team Structure
 
@@ -19,13 +19,13 @@ All team settings live in `gmux.yaml` at the project root. Read it at the start 
 
 ### Step 1 — Read Configuration
 ```
-Read gmux.yaml
+Read harnest.yaml
 ```
 Parse team settings, agent definitions, tool availability, and workflow config.
 
 ### Step 2 — Create Team
 ```
-TeamCreate(team_name: "gmux", description: "gmux agent team")
+TeamCreate(team_name: "harnest", description: "harnest agent team")
 ```
 
 ### Step 3 — Spawn Architect
@@ -64,16 +64,16 @@ When all tasks are complete:
 
 ## Branch Naming Convention
 
-Jr engineers use the prefix from `workflow.branch_prefix` (default: `gmux/`):
+Jr engineers use the prefix from `workflow.branch_prefix` (default: `harnest/`):
 ```
-gmux/<task-id>-<short-description>
+harnest/<task-id>-<short-description>
 ```
 
 ## Tmux Mode
 
-gmux also supports a **tmux split-pane mode** where each agent runs as a separate `claude` CLI process in its own tmux pane. Use `gmux start "<task>"` to launch and `gmux stop` to tear down.
+harnest also supports a **tmux split-pane mode** where each agent runs as a separate `claude` CLI process in its own tmux pane. Use `harnest fly "<task>"` to launch and `harnest land` to tear down.
 
-In tmux mode, agents coordinate through the `.gmux/` filesystem directory instead of built-in Claude Code team tools. Each agent's prompt includes a coordination protocol that explains how to read/write task files, send messages, and update status through the filesystem. The layout includes a monitor pane with a live dashboard.
+In tmux mode, agents coordinate through the `.harnest/` filesystem directory instead of built-in Claude Code team tools. Each agent's prompt includes a coordination protocol that explains how to read/write task files, send messages, and update status through the filesystem. The layout includes a monitor pane with a live dashboard.
 
 This is an alternative to the built-in Agent teams workflow above — use whichever fits your needs.
 
@@ -83,4 +83,4 @@ This is an alternative to the built-in Agent teams workflow above — use whiche
 - **MCP servers**: Defined globally in `.claude/settings.json`. Agent frontmatter `mcpServers` documents intent but the global config is the runtime source.
 - **Worktree isolation**: Jr engineers use `isolation: worktree` for parallel-safe implementation. No manual EnterWorktree calls needed.
 - **Team lead**: The main Claude Code session acts as team lead — it spawns the team, monitors progress, and reports back to the user.
-- **Supplementary tools are optional**: Set `enabled: false` in `gmux.yaml` and `"disabled": true` in `settings.json` to turn off any MCP server.
+- **Supplementary tools are optional**: Set `enabled: false` in `harnest.yaml` and `"disabled": true` in `settings.json` to turn off any MCP server.

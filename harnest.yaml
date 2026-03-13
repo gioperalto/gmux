@@ -1,11 +1,11 @@
-# gmux - Composable Claude Code Agent Harness
+# harnest - Composable Claude Code Agent Harness
 # Drop this config + .claude/ directory into any project to enable team-based development.
 #
 # All sections are configurable. Disable supplementary tools by setting enabled: false.
 # Modify agent roles, models, and counts to fit your project needs.
 
 team:
-  name: gmux
+  name: harnest
   description: "Composable agent team for structured development workflows"
 
 # ──────────────────────────────────────────────────────────────────────────────
@@ -89,7 +89,7 @@ workflow:
   use_worktrees: true
 
   # Branch naming convention for jr engineer worktrees
-  branch_prefix: "gmux/"
+  branch_prefix: "harnest/"
 
   # Whether to run tests automatically after sr engineer approval
   auto_test_on_approval: true
@@ -99,10 +99,10 @@ workflow:
 
 # ──────────────────────────────────────────────────────────────────────────────
 # Tmux Split-Pane Mode
-# Used by `gmux start` to run agents as separate claude processes in tmux panes.
+# Used by `harnest fly` to run agents as separate claude processes in tmux panes.
 # ──────────────────────────────────────────────────────────────────────────────
 tmux:
-  session_name: gmux
+  session_name: harnest
   layout:
     - [architect, sr-engineer]
     - [jr-engineer-1, jr-engineer-2]

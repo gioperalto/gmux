@@ -1,4 +1,4 @@
-# fullstack — gmux Template
+# fullstack — harnest Chick
 
 A structured multi-agent team for full-stack development. An architect plans, a senior engineer sets conventions and reviews, junior engineers implement in parallel, and a test engineer validates before merge.
 
@@ -42,7 +42,7 @@ Architect (plan + task list)
 
 ## Configuration
 
-All team configuration lives in `gmux.yaml`:
+All team configuration lives in `harnest.yaml`:
 
 ```yaml
 agents:
@@ -54,18 +54,18 @@ agents:
 workflow:
   max_review_cycles: 3          # Reviews before escalating to architect
   use_worktrees: true           # Jr engineers work in isolated worktrees
-  branch_prefix: "gmux/"        # Branch naming: gmux/<task-id>-<desc>
+  branch_prefix: "harnest/"    # Branch naming: harnest/<task-id>-<desc>
   auto_test_on_approval: true   # Auto-run tests after sr engineer approval
   require_test_approval: true   # Require test engineer sign-off to merge
 ```
 
 ## Tmux Split-Pane Mode
 
-In addition to the built-in Agent teams workflow, this template supports running agents as separate `claude` processes in tmux split panes.
+In addition to the built-in Agent teams workflow, this chick supports running agents as separate `claude` processes in tmux split panes.
 
 **Start a session:**
 ```bash
-gmux start "build a user authentication system"
+harnest fly "build a user authentication system"
 ```
 
 This creates a tmux session with the following layout:
@@ -82,19 +82,19 @@ This creates a tmux session with the following layout:
 
 Each agent pane runs a separate `claude -p` process with an auto-generated prompt that includes the coordination protocol and agent instructions. The **monitor** pane displays a live dashboard showing task status, agent state, recent git commits, and activity logs.
 
-**Coordination:** Agents coordinate through the `.gmux/` directory using JSON files for tasks, messages, and status updates — no built-in Claude Code team tools required.
+**Coordination:** Agents coordinate through the `.harnest/` directory using JSON files for tasks, messages, and status updates — no built-in Claude Code team tools required.
 
 **Stop a session:**
 ```bash
-gmux stop
+harnest land
 ```
 
-This kills the tmux session, removes git worktrees, prints a task summary, and optionally archives the `.gmux/` directory.
+This kills the tmux session, removes git worktrees, prints a task summary, and optionally archives the `.harnest/` directory.
 
-**Configure the layout** in `gmux.yaml`:
+**Configure the layout** in `harnest.yaml`:
 ```yaml
 tmux:
-  session_name: gmux
+  session_name: harnest
   layout:
     - [architect, sr-engineer]
     - [jr-engineer-1, jr-engineer-2]
@@ -108,9 +108,9 @@ tmux:
 
 ## Supplementary Tools
 
-All supplementary tools are optional. The template works without them, but they enhance specific agent capabilities. Disable any tool by setting `enabled: false` in `gmux.yaml` and `"disabled": true` in `.claude/settings.json`.
+All supplementary tools are optional. The chick works without them, but they enhance specific agent capabilities. Disable any tool by setting `enabled: false` in `harnest.yaml` and `"disabled": true` in `.claude/settings.json`.
 
-> **Note:** This template ships with MCP servers pre-configured in `.claude/settings.json`. The instructions below are for installing the underlying tools that those servers depend on. If you'd rather register MCP servers yourself (or add them to a different scope), use `claude mcp add`.
+> **Note:** This chick ships with MCP servers pre-configured in `.claude/settings.json`. The instructions below are for installing the underlying tools that those servers depend on. If you'd rather register MCP servers yourself (or add them to a different scope), use `claude mcp add`.
 
 **Codex CLI** (used by sr-engineer)
 
@@ -136,7 +136,7 @@ Enable in Claude Code settings. Used by jr engineers for UI implementation guida
 
 To disable a supplementary tool:
 
-1. In `gmux.yaml`, set `enabled: false`:
+1. In `harnest.yaml`, set `enabled: false`:
    ```yaml
    tools:
      codex:

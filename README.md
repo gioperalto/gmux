@@ -1,6 +1,32 @@
-# gmux
+# harnest
 
-A composable agent team configuration for [Claude Code](https://docs.anthropic.com/en/docs/claude-code). Drop gmux into any project to enable structured, multi-agent development workflows — powered by configurable templates.
+> *Every flock needs a nest. Every nest needs its chicks.*
+
+**harnest** is a composable agent team harness for [Claude Code](https://docs.anthropic.com/en/docs/claude-code). Drop it into any project to enable structured, multi-agent development workflows — powered by configurable chicks.
+
+## The Language of harnest
+
+harnest speaks in birds.
+
+- **The nest** is where your team lives. It's the configuration your project hatches from — a curated set of agent definitions, workflow rules, and supplementary tools. Think of it as the home base that every chick knows.
+- **A chick** is a specific nest configuration, like `fullstack`. Chicks define who's on your team, how they work together, and what tools they have access to. Set one globally or pick one per session.
+- **Hatch** your project once to scaffold the nest into place. From there, your team wakes up every time you open Claude.
+- **Fly** to launch a full tmux split-pane session — each agent in its own pane, all of them coordinating in real time.
+- **Land** to bring the session home, clean up worktrees, and archive the run.
+
+## Commands
+
+| Command | Description |
+|---------|-------------|
+| `harnest hatch` | Scaffold a chick into the current project |
+| `harnest hatch --chick fullstack` | Hatch with a specific chick (one-time) |
+| `harnest --chick fullstack` | Set the global default chick |
+| `harnest nest` | List available chicks |
+| `harnest fly "build a login system"` | Launch agents in tmux split panes |
+| `harnest fly --chick fullstack "..."` | Fly with a specific chick |
+| `harnest land` | Stop the tmux session and clean up |
+| `harnest version` | Print version |
+| `harnest help` | Show help |
 
 ## Prerequisites
 
@@ -22,63 +48,63 @@ You need an active Anthropic API key or Claude Pro/Team subscription. See [Claud
 
 **Experimental Teams Flag**
 
-Agent teams require the experimental teams feature. `gmux init` configures this automatically in `.claude/settings.json`.
+Agent teams require the experimental teams feature. `harnest hatch` configures this automatically in `.claude/settings.json`.
 
 ## Quick Start
 
-1. **Install gmux:**
+1. **Install harnest:**
    ```bash
-   brew install gmux
+   brew install harnest
    ```
    Or install from a local clone:
    ```bash
-   brew install --formula Formula/gmux.rb
+   brew install --formula Formula/harnest.rb
    ```
 
-2. **Initialize in your project:**
+2. **Hatch in your project:**
    ```bash
    cd your-project
-   gmux init
+   harnest hatch
    ```
-   This scaffolds the default template (`fullstack`) into your project — copying `gmux.yaml`, agent definitions, and merging Claude Code settings.
+   This scaffolds the default chick (`fullstack`) into your project — copying `harnest.yaml`, agent definitions, and merging Claude Code settings.
 
 3. **Start Claude Code:**
    ```bash
    claude
    ```
 
-4. **Give it a task.** Claude reads the config on startup and bootstraps a gmux team.
+4. **Give it a task.** Claude reads the config on startup and bootstraps a harnest team.
 
-## Templates
+## Chicks
 
-gmux ships with pre-built team configurations called templates. Each template defines a set of agent roles, workflow rules, and supplementary tools tailored for a specific development style.
+harnest ships with pre-built team configurations called chicks. Each chick defines a set of agent roles, workflow rules, and supplementary tools tailored for a specific development style.
 
-**Set a global default template:**
+**Set a global default chick:**
 ```bash
-gmux --template fullstack
+harnest --chick fullstack
 ```
 
-**List available templates:**
+**List available chicks:**
 ```bash
-gmux templates
+harnest nest
 ```
 
-**Initialize with a specific template (one-time override):**
+**Hatch with a specific chick (one-time override):**
 ```bash
-gmux init --template fullstack
+harnest hatch --chick fullstack
 ```
 
-The global default is stored in `~/.config/gmux/config` and used by `gmux init` when no `--template` flag is given.
+The global default is stored in `~/.config/harnest/config` and used by `harnest hatch` when no `--chick` flag is given.
 
 ## Tmux Split-Pane Mode
 
 Run agents as separate `claude` processes in a tmux split-pane layout with a live dashboard:
 
 ```bash
-gmux start "build a hello world API with tests"
+harnest fly "build a hello world API with tests"
 ```
 
-This creates a tmux session with one pane per agent (architect, sr-engineer, jr-engineers, test-engineer) plus a monitor dashboard. Agents coordinate through a `.gmux/` directory using file-based task management and messaging.
+This creates a tmux session with one pane per agent (architect, sr-engineer, jr-engineers, test-engineer) plus a monitor dashboard. Agents coordinate through a `.harnest/` directory using file-based task management and messaging.
 
 ```
 ┌───────────────────┬───────────────────┐
@@ -90,24 +116,24 @@ This creates a tmux session with one pane per agent (architect, sr-engineer, jr-
 └───────────────────────┴───────────────┘
 ```
 
-**Stop the session:**
+**Land the session:**
 ```bash
-gmux stop
+harnest land
 ```
 
-Tmux mode requires `tmux` and `claude` CLI to be installed. The layout and monitor settings are configurable in `gmux.yaml` under the `tmux:` section.
+Tmux mode requires `tmux` and `claude` CLI to be installed. The layout and monitor settings are configurable in `harnest.yaml` under the `tmux:` section.
 
-## Available Templates
+## Available Chicks
 
-| Template | Description |
-|----------|-------------|
-| [`fullstack`](templates/fullstack/) | Architect + Sr Engineer + Jr Engineers + Test Engineer. Plan → implement → review → test workflow. |
+| Chick | Description |
+|-------|-------------|
+| [`fullstack`](nest/fullstack/) | Architect + Sr Engineer + Jr Engineers + Test Engineer. Plan → implement → review → test workflow. |
 
-See the [templates/](templates/) directory for full documentation on each template.
+See the [nest/](nest/) directory for full documentation on each chick.
 
 ## Contributing
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines on contributing to gmux, including how to create new templates.
+See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines on contributing to harnest, including how to create new chicks.
 
 ## License
 

@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
-"""Parse gmux.yaml and output JSON to stdout.
+"""Parse harnest.yaml and output JSON to stdout.
 
-Usage: python3 gmux-parse-yaml.py <path-to-gmux.yaml>
+Usage: python3 harnest-parse-yaml.py <path-to-harnest.yaml>
 
 Uses PyYAML if available, otherwise falls back to a built-in parser
-that handles the subset of YAML used by gmux.yaml (maps, lists,
+that handles the subset of YAML used by harnest.yaml (maps, lists,
 scalars, block sequences, flow sequences).
 """
 
@@ -14,7 +14,7 @@ import sys
 
 
 def parse_yaml_fallback(text):
-    """Minimal YAML parser for gmux.yaml format."""
+    """Minimal YAML parser for harnest.yaml format."""
     lines = text.splitlines()
     return _parse_block(lines, 0, 0)[0]
 
@@ -250,7 +250,7 @@ def _parse_sequence(lines, start, base_indent):
 
 def main():
     if len(sys.argv) != 2:
-        print(f"Usage: {sys.argv[0]} <gmux.yaml>", file=sys.stderr)
+        print(f"Usage: {sys.argv[0]} <harnest.yaml>", file=sys.stderr)
         sys.exit(1)
 
     path = sys.argv[1]

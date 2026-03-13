@@ -13,11 +13,11 @@ MAGENTA='\033[35m'
 RED='\033[31m'
 WHITE='\033[37m'
 
-GMUX_DIR=".gmux"
-CONFIG_FILE="$GMUX_DIR/config.json"
-TASKS_DIR="$GMUX_DIR/tasks"
-STATUS_DIR="$GMUX_DIR/status"
-LOG_FILE="$GMUX_DIR/log.jsonl"
+HARNEST_DIR=".harnest"
+CONFIG_FILE="$HARNEST_DIR/config.json"
+TASKS_DIR="$HARNEST_DIR/tasks"
+STATUS_DIR="$HARNEST_DIR/status"
+LOG_FILE="$HARNEST_DIR/log.jsonl"
 
 # ── helpers ──────────────────────────────────────────────────────────────────
 
@@ -82,23 +82,23 @@ hr() {
 # ── sections ─────────────────────────────────────────────────────────────────
 
 print_header() {
-  local session_name="gmux"
+  local session_name="harnest"
   local started_at=""
   local elapsed_str="--:--:--"
 
   if [[ -f "$CONFIG_FILE" ]]; then
-    session_name=$(jq_safe '.session_name' "$CONFIG_FILE") || session_name="gmux"
+    session_name=$(jq_safe '.session_name' "$CONFIG_FILE") || session_name="harnest"
     started_at=$(jq_safe '.started_at' "$CONFIG_FILE") || started_at=""
     [[ -n "$started_at" ]] && elapsed_str=$(format_elapsed "$(elapsed_seconds "$started_at")")
   fi
 
   echo ""
-  printf "${BOLD}${CYAN}  ██████╗ ███╗   ███╗██╗   ██╗██╗  ██╗${RESET}\n"
-  printf "${BOLD}${CYAN} ██╔════╝ ████╗ ████║██║   ██║╚██╗██╔╝${RESET}\n"
-  printf "${BOLD}${CYAN} ██║  ███╗██╔████╔██║██║   ██║ ╚███╔╝ ${RESET}\n"
-  printf "${BOLD}${CYAN} ██║   ██║██║╚██╔╝██║██║   ██║ ██╔██╗ ${RESET}\n"
-  printf "${BOLD}${CYAN} ╚██████╔╝██║ ╚═╝ ██║╚██████╔╝██╔╝ ██╗${RESET}\n"
-  printf "${BOLD}${CYAN}  ╚═════╝ ╚═╝     ╚═╝ ╚═════╝ ╚═╝  ╚═╝${RESET}\n"
+  printf "${BOLD}${CYAN} ██╗  ██╗ █████╗ ██████╗ ███╗   ██╗███████╗███████╗████████╗${RESET}\n"
+  printf "${BOLD}${CYAN} ██║  ██║██╔══██╗██╔══██╗████╗  ██║██╔════╝██╔════╝╚══██╔══╝${RESET}\n"
+  printf "${BOLD}${CYAN} ███████║███████║██████╔╝██╔██╗ ██║█████╗  ███████╗   ██║   ${RESET}\n"
+  printf "${BOLD}${CYAN} ██╔══██║██╔══██║██╔══██╗██║╚██╗██║██╔══╝  ╚════██║   ██║   ${RESET}\n"
+  printf "${BOLD}${CYAN} ██║  ██║██║  ██║██║  ██║██║ ╚████║███████╗███████║   ██║   ${RESET}\n"
+  printf "${BOLD}${CYAN} ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚═══╝╚══════╝╚══════╝   ╚═╝   ${RESET}\n"
   echo ""
   printf "  ${BOLD}Session:${RESET} ${WHITE}${session_name}${RESET}"
   if [[ -n "$started_at" ]]; then

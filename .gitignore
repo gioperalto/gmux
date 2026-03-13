@@ -1,6 +1,6 @@
 .claude/settings.local.json
 .claude/worktrees/
-.gmux/
+.harnest/
 .DS_Store
 Thumbs.db
 *.swp

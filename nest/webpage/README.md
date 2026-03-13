@@ -1,4 +1,4 @@
-# webpage — harnest Chick
+# webpage — Harnest Chick
 
 A website creation team for building single-page React Vite TypeScript sites. A strategist interviews the customer, an artist generates visual assets, a builder constructs the site, and a UX tester validates the result.
 
@@ -95,7 +95,7 @@ This creates a tmux session with the following intended layout:
 
 Each agent pane runs a separate `claude -p` process with a generated prompt that includes the coordination protocol and agent instructions. Agents coordinate through the `.harnest/` directory using file-based messaging.
 
-> **Layout note**: The full-height spanning center monitor column is the intended design. Current harnest uses a tiled layout approximation — a future enhancement will support the exact spanning layout.
+> **Layout note**: The full-height spanning center monitor column is the intended design. Current Harnest uses a tiled layout approximation — a future enhancement will support the exact spanning layout.
 
 **Stop the session:**
 ```bash

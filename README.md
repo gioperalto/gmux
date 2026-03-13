@@ -1,12 +1,12 @@
-# harnest
+# Harnest
 
 > *Every flock needs a nest. Every nest needs its chicks.*
 
-**harnest** is a composable agent team harness for [Claude Code](https://docs.anthropic.com/en/docs/claude-code). Drop it into any project to enable structured, multi-agent development workflows — powered by configurable chicks.
+**Harnest** is a composable agent team harness for [Claude Code](https://docs.anthropic.com/en/docs/claude-code). Drop it into any project to enable structured, multi-agent development workflows — powered by configurable chicks.
 
-## The Language of harnest
+## The Language of Harnest
 
-harnest speaks in birds.
+Harnest speaks in birds.
 
 - **The nest** is where your team lives. It's the configuration your project hatches from — a curated set of agent definitions, workflow rules, and supplementary tools. Think of it as the home base that every chick knows.
 - **A chick** is a specific nest configuration, like `fullstack`. Chicks define who's on your team, how they work together, and what tools they have access to. Set one globally or pick one per session.
@@ -52,7 +52,7 @@ Agent teams require the experimental teams feature. `harnest hatch` configures t
 
 ## Quick Start
 
-1. **Install harnest:**
+1. **Install Harnest:**
    ```bash
    brew install harnest
    ```
@@ -73,11 +73,11 @@ Agent teams require the experimental teams feature. `harnest hatch` configures t
    claude
    ```
 
-4. **Give it a task.** Claude reads the config on startup and bootstraps a harnest team.
+4. **Give it a task.** Claude reads the config on startup and bootstraps a Harnest team.
 
 ## Chicks
 
-harnest ships with pre-built team configurations called chicks. Each chick defines a set of agent roles, workflow rules, and supplementary tools tailored for a specific development style.
+Harnest ships with pre-built team configurations called chicks. Each chick defines a set of agent roles, workflow rules, and supplementary tools tailored for a specific development style.
 
 **Set a global default chick:**
 ```bash
@@ -134,7 +134,7 @@ See the [nest/](nest/) directory for full documentation on each chick.
 
 ## Contributing
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines on contributing to harnest, including how to create new chicks.
+See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines on contributing to Harnest, including how to create new chicks.
 
 ## License
 

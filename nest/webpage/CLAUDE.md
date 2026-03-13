@@ -1,4 +1,4 @@
-# harnest — Single-Page Website Chick (webpage)
+# Harnest — Single-Page Website Chick (webpage)
 
 This chick creates single-page websites in React Vite TypeScript. The team is led by a strategist who interviews the customer and produces a brief, supported by an artist who generates images and a builder who constructs the site, validated by a UX tester who signs off before the website is done.
 
@@ -84,7 +84,7 @@ Use `harnest fly "<task>"` to launch agents in split panes. Intended layout:
 
 The monitor pane (center) displays a live dashboard of task status, agent state, and git activity.
 
-> **Note**: The full-height spanning center monitor is the intended layout. Current harnest uses a tiled approximation.
+> **Note**: The full-height spanning center monitor is the intended layout. Current Harnest uses a tiled approximation.
 
 Use `harnest land` to tear down the session.
 

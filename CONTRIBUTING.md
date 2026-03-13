@@ -1,10 +1,10 @@
-# Contributing to harnest
+# Contributing to Harnest
 
-Thanks for your interest in contributing to harnest! This guide covers the fork workflow and how to add new chicks to the nest.
+Thanks for your interest in contributing to Harnest! This guide covers the fork workflow and how to add new chicks to the nest.
 
 ## The Language
 
-harnest uses bird-centric terminology throughout the codebase:
+Harnest uses bird-centric terminology throughout the codebase:
 
 - **nest** — the `nest/` directory; the collection of all chicks
 - **chick** — a specific team configuration (e.g., `fullstack`) scaffolded by `harnest hatch`
